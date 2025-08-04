@@ -132,6 +132,15 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+        #hint {
+            color: var(--light-text);
+            font-style: italic;
+            margin-top: 15px;
+            font-size: clamp(14px, 3.8vw, 16px);
+            user-select: none;
+            line-height: 1.5;
+            min-height: 22px;
+        }
         #completion, #result {
             font-size: clamp(16px, 4.2vw, 19px);
             font-weight: 600;
@@ -414,6 +423,14 @@
         function showHint() {
             document.getElementById('hint').innerHTML = `Hint: ${sentences[currentSentenceIndex].en}`;
         }
+        
+        // NEW: Function to clear the hint when input is focused
+        function clearHint() {
+            const hintEl = document.getElementById('hint');
+            if(hintEl) {
+                hintEl.innerHTML = '';
+            }
+        }
 
         function submitName() {
             const nameInput = document.getElementById('playerNameInput');
@@ -446,7 +463,9 @@
                 <p id="hint"></p>
                 <p id="result"></p>
             `;
-            document.getElementById('userInput').addEventListener('keypress', handleKeyPress);
+            const userInputEl = document.getElementById('userInput');
+            userInputEl.addEventListener('keypress', handleKeyPress);
+            userInputEl.addEventListener('focus', clearHint); // Add focus event listener
             playSentence();
             startAutoPlay();
         }
