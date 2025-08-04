@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Game: I Can Do It!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* New Creative Studio theme */
+            --primary-color: #20c997; /* Teal */
+            --primary-dark: #1aab8a;
+            --accent-color: #fd7e14; /* Orange */
+            --background-color: #f8f9fa;
+            --container-bg: #ffffff;
+            --text-color: #343a40;
+            --light-text: #6c757d;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --border-color: #dee2e6;
+            --light-bg-highlight: #e6fffa;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            overflow-x: hidden;
+            color: var(--text-color);
+        }
+        #effect-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        #game-container {
+            text-align: center;
+            background: var(--container-bg);
+            padding: 25px 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            width: 90%;
+            max-width: 680px;
+            position: relative;
+            border: 1px solid var(--border-color);
+            z-index: 1;
+        }
+        h1 {
+            font-size: clamp(26px, 5.5vw, 36px);
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        p {
+            font-size: clamp(16px, 4.2vw, 18px);
+            line-height: 1.6;
+            margin-top: 0;
+        }
+        #vietnamese-translation {
+            font-size: clamp(18px, 5vw, 22px);
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 20px 0 10px 0;
+            padding: 10px 15px;
+            background-color: var(--light-bg-highlight);
+            border-radius: 12px;
+            min-height: 30px;
+        }
+        input[type="text"] {
+            padding: 14px 20px;
+            font-size: clamp(16px, 4.5vw, 18px);
+            width: 100%;
+            max-width: 500px;
+            margin: 20px 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            background-color: #fff;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(32, 201, 151, 0.3);
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: clamp(15px, 4.2vw, 17px);
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(32, 201, 151, 0.2);
+        }
+        button.accent {
+            background-color: var(--accent-color);
+        }
+        button.accent:hover:not(:disabled) {
+            background-color: #e87012;
+            box-shadow: 0 4px 15px rgba(253, 126, 20, 0.2);
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #completion, #result {
+            font-size: clamp(16px, 4.2vw, 19px);
+            font-weight: 600;
+            margin-top: 15px;
+            min-height: 27px;
+        }
+        .particle { position: absolute; }
+        /* Styles for Review Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 16px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 { color: var(--primary-color); }
+        .modal-content ul { list-style: none; padding: 0; }
+        .modal-content li { background: var(--light-bg-highlight); border-radius: 8px; padding: 10px; margin-bottom: 10px; text-align: left; }
+        .modal-content li strong { color: var(--primary-dark); }
+        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="effect-container"></div>
+    <div id="game-container">
+        <!-- Initial screen to get player name -->
+        <h1>Welcome to Spelling Master!</h1>
+        <p>Please enter your name to start.</p>
+        <input type="text" id="playerNameInput" placeholder="Your Name">
+        <button onclick="submitName()">Start Game</button>
+    </div>
+
+    <!-- Modal for reviewing mistakes -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeReviewModal()">&times;</span>
+            <h2>Review Your Mistakes</h2>
+            <ul id="mistakeList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const sentences = [
+            { en: "I can play volleyball.", vi: "Tôi có thể đá bóng chuyền." },
+            { en: "I can play badminton.", vi: "Tôi có thể chơi cầu lông." },
+            { en: "I can play the piano.", vi: "Tôi có thể chơi đàn piano." },
+            { en: "I can play the drums.", vi: "Tôi có thể chơi trống." },
+            { en: "I can play the trumpet.", vi: "Tôi có thể thổi kèn trumpet." },
+            { en: "I can roller skate.", vi: "Tôi có thể trượt patin." },
+            { en: "I can swim backstroke.", vi: "Tôi có thể bơi ngửa." },
+            { en: "I can swim breaststroke.", vi: "Tôi có thể bơi ếch." },
+            { en: "I can climb a tree.", vi: "Tôi có thể leo cây." },
+            { en: "I can meditate.", vi: "Tôi có thể ngồi thiền." },
+            { en: "I can read a map.", vi: "Tôi có thể đọc bản đồ." },
+            { en: "I can do math.", vi: "Tôi có thể làm toán." },
+            { en: "I can do a science experiment.", vi: "Tôi có thể làm thí nghiệm khoa học." },
+            { en: "I can write a poem.", vi: "Tôi có thể viết thơ." },
+            { en: "I can write a short story.", vi: "Tôi có thể viết truyện ngắn." },
+            { en: "I can compose music.", vi: "Tôi có thể sáng tác nhạc." },
+            { en: "I can take landscape photos.", vi: "Tôi có thể chụp ảnh phong cảnh." },
+            { en: "I can take portraits.", vi: "Tôi có thể chụp ảnh chân dung." },
+            { en: "I can make tea.", vi: "Tôi có thể pha trà." },
+            { en: "I can make a salad.", vi: "Tôi có thể làm salad." },
+            { en: "I can wrap a gift.", vi: "Tôi có thể gói quà." },
+            { en: "I can tie a tie.", vi: "Tôi có thể thắt cà vạt." },
+            { en: "I can fix a bike.", vi: "Tôi có thể sửa xe đạp." },
+            { en: "I can sew clothes.", vi: "Tôi có thể vá quần áo." },
+            { en: "I can knit.", vi: "Tôi có thể đan len." },
+            { en: "I can make decorations.", vi: "Tôi có thể làm đồ trang trí." },
+            { en: "I can fold a paper plane.", vi: "Tôi có thể gấp máy bay giấy." },
+            { en: "I can draw a landscape.", vi: "Tôi có thể vẽ tranh phong cảnh." },
+            { en: "I can draw a portrait.", vi: "Tôi có thể vẽ chân dung." },
+            { en: "I can take photos of the night sky.", vi: "Tôi có thể chụp ảnh bầu trời đêm." },
+            { en: "I can watch fireworks.", vi: "Tôi có thể xem pháo hoa." },
+            { en: "I can fly a kite.", vi: "Tôi có thể thả diều." },
+            { en: "I can dance hip hop.", vi: "Tôi có thể nhảy hip hop." },
+            { en: "I can dance ballet.", vi: "Tôi có thể múa ballet." },
+            { en: "I can dance folk dance.", vi: "Tôi có thể múa dân gian." },
+            { en: "I can do yoga.", vi: "Tôi có thể tập yoga." },
+            { en: "I can play chess.", vi: "Tôi có thể chơi cờ vua." },
+            { en: "I can play ludo.", vi: "Tôi có thể chơi cờ cá ngựa." },
+            { en: "I can build a model.", vi: "Tôi có thể làm mô hình." },
+            { en: "I can build a robot.", vi: "Tôi có thể lắp robot." },
+            { en: "I can code a game.", vi: "Tôi có thể lập trình game." },
+            { en: "I can make a video.", vi: "Tôi có thể tạo video." },
+            { en: "I can take a selfie.", vi: "Tôi có thể chụp ảnh tự sướng." },
+            { en: "I can sing in a choir.", vi: "Tôi có thể hát hợp xướng." },
+            { en: "I can paint a mural.", vi: "Tôi có thể vẽ tranh tường." },
+            { en: "I can write a diary.", vi: "Tôi có thể viết nhật ký." },
+            { en: "I can write an email.", vi: "Tôi có thể viết email." },
+            { en: "I can tell a joke.", vi: "Tôi có thể kể chuyện cười." },
+            { en: "I can solve puzzles.", vi: "Tôi có thể giải đố." },
+            { en: "I can solve crosswords.", vi: "Tôi có thể giải ô chữ." },
+            { en: "I can take photos.", vi: "Tôi có thể chụp ảnh." },
+            { en: "I can play shuttlecock.", vi: "Tôi có thể đá cầu." },
+            { en: "I can fold origami.", vi: "Tôi có thể gấp giấy origami." },
+            { en: "I can paint with watercolors.", vi: "Tôi có thể vẽ tranh màu nước." },
+            { en: "I can bake a cake.", vi: "Tôi có thể làm bánh." },
+            { en: "I can go fishing.", vi: "Tôi có thể câu cá." },
+            { en: "I can climb a mountain.", vi: "Tôi có thể leo núi." },
+            { en: "I can ice skate.", vi: "Tôi có thể trượt băng." },
+            { en: "I can skateboard.", vi: "Tôi có thể trượt ván." },
+            { en: "I can play basketball.", vi: "Tôi có thể chơi bóng rổ." },
+            { en: "I can play the flute.", vi: "Tôi có thể thổi sáo." },
+            { en: "I can plant flowers.", vi: "Tôi có thể trồng hoa." },
+            { en: "I can do gardening.", vi: "Tôi có thể làm vườn." },
+            { en: "I can take photos of the sunset.", vi: "Tôi có thể chụp ảnh hoàng hôn." },
+            { en: "I can watch cartoons.", vi: "Tôi có thể xem phim hoạt hình." },
+            { en: "I can watch the rain.", vi: "Tôi có thể ngắm mưa." },
+            { en: "I can do crafts.", vi: "Tôi có thể làm thủ công." },
+            { en: "I can sing karaoke.", vi: "Tôi có thể hát karaoke." },
+            { en: "I can tell a story.", vi: "Tôi có thể kể chuyện." },
+            { en: "I can act in a play.", vi: "Tôi có thể diễn kịch." }
+        ];
+        let playerName = '';
+        let incorrectAnswers = [];
+        let currentSentenceIndex = 0;
+        let completedCount = 0;
+        let isPlaying = false;
+        let autoPlayInterval;
+        let wrongAttempts = 0;
+        const TOTAL_SENTENCES = sentences.length;
+
+        function showCelebrationEffect() {
+            const launchWave = (delay) => {
+                setTimeout(() => {
+                    const container = document.getElementById('effect-container');
+                    const confettiCount = 50;
+                    const colors = ['#20c997', '#fd7e14', '#FFD700', '#FFFFFF'];
+                    for (let i = 0; i < confettiCount; i++) createConfetti(container, colors);
+                }, delay);
+            };
+            launchWave(0);
+            launchWave(400);
+            launchWave(800);
+        }
+
+        function createConfetti(container, colors) {
+            const confetti = document.createElement('div');
+            confetti.className = 'particle';
+            container.appendChild(confetti);
+            const size = Math.random() * 8 + 4;
+            const xPos = Math.random() * 100;
+            confetti.style.width = `${size}px`;
+            confetti.style.height = `${size * 1.5}px`;
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.left = `${xPos}vw`;
+            confetti.style.top = '-20px';
+            const fallDuration = Math.random() * 2000 + 3000;
+            const horizontalDrift = (Math.random() - 0.5) * 200;
+            const rotation = Math.random() * 720 - 360;
+            const animation = confetti.animate([
+                { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                { transform: `translate(${horizontalDrift}px, ${window.innerHeight + 20}px) rotate(${rotation}deg)`, opacity: 0 }
+            ], { duration: fallDuration, easing: 'ease-in-out' });
+            animation.onfinish = () => confetti.remove();
+        }
+
+        function playSentence() {
+            if (!isPlaying && sentences[currentSentenceIndex]) {
+                isPlaying = true;
+                const utterance = new SpeechSynthesisUtterance(sentences[currentSentenceIndex].en);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                utterance.onend = () => { isPlaying = false; };
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function startAutoPlay() {
+            if (autoPlayInterval) clearInterval(autoPlayInterval);
+            autoPlayInterval = setInterval(() => { if (!isPlaying) playSentence(); }, 5000);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) clearInterval(autoPlayInterval);
+        }
+
+        function checkAnswer() {
+            const checkBtn = document.getElementById('checkBtn');
+            if (checkBtn.disabled) return;
+            const userInput = document.getElementById('userInput').value.trim();
+            const result = document.getElementById('result');
+            const currentSentence = sentences[currentSentenceIndex];
+            const normalizeApostrophes = (str) => str.replace(/[’‘`]/g, "'");
+
+            if (normalizeApostrophes(userInput) === normalizeApostrophes(currentSentence.en)) {
+                stopAutoPlay();
+                checkBtn.disabled = true;
+                document.getElementById('hintBtn').disabled = true;
+                document.getElementById('playSoundBtn').disabled = true;
+                result.textContent = "Correct!";
+                result.className = 'correct';
+                showCelebrationEffect();
+                if (wrongAttempts < 2) {
+                    completedCount++;
+                    document.getElementById('completion').textContent = `Score: ${completedCount}/${TOTAL_SENTENCES}`;
+                }
+                wrongAttempts = 0;
+                setTimeout(() => {
+                    currentSentenceIndex++;
+                    if (currentSentenceIndex >= TOTAL_SENTENCES) {
+                        let reviewButtonHTML = '';
+                        if (incorrectAnswers.length > 0) {
+                            reviewButtonHTML = `<button class="accent" onclick="showReviewModal()">Xem lại lỗi sai</button>`;
+                        }
+                        document.getElementById('game-container').innerHTML = `<h1>Congratulations, ${playerName}!</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES}!</p><div class="button-group"><button onclick="resetGame()">Play Again</button>${reviewButtonHTML}</div>`;
+                    } else {
+                        updateGameScreen();
+                        playSentence();
+                        startAutoPlay();
+                    }
+                }, 2000);
+            } else {
+                wrongAttempts++;
+                result.textContent = `Incorrect, try again! (${3 - wrongAttempts} left)`;
+                result.className = 'incorrect';
+                if (wrongAttempts >= 3) {
+                    stopAutoPlay();
+                    checkBtn.disabled = true;
+                    document.getElementById('hintBtn').disabled = true;
+                    document.getElementById('playSoundBtn').disabled = true;
+                    if (!incorrectAnswers.some(item => item.en === currentSentence.en)) {
+                        incorrectAnswers.push(currentSentence);
+                    }
+                    wrongAttempts = 0;
+                    result.textContent = "Moving to the next sentence...";
+                    setTimeout(() => {
+                        currentSentenceIndex++;
+                        if (currentSentenceIndex >= TOTAL_SENTENCES) {
+                             let reviewButtonHTML = '';
+                            if (incorrectAnswers.length > 0) {
+                                reviewButtonHTML = `<button class="accent" onclick="showReviewModal()">Xem lại lỗi sai</button>`;
+                            }
+                            document.getElementById('game-container').innerHTML = `<h1>Game Over, ${playerName}!</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES}.</p><div class="button-group"><button onclick="resetGame()">Play Again</button>${reviewButtonHTML}</div>`;
+                        } else {
+                            updateGameScreen();
+                            playSentence();
+                            startAutoPlay();
+                        }
+                    }, 2000);
+                }
+            }
+        }
+
+        function updateGameScreen() {
+            if (document.getElementById('userInput')) {
+                const currentData = sentences[currentSentenceIndex];
+                document.getElementById('userInput').value = '';
+                document.getElementById('vietnamese-translation').textContent = currentData.vi;
+                document.getElementById('hint').textContent = '';
+                document.getElementById('result').textContent = '';
+                document.getElementById('completion').textContent = `Score: ${completedCount}/${TOTAL_SENTENCES}`;
+                const checkBtn = document.getElementById('checkBtn');
+                if (checkBtn) checkBtn.disabled = false;
+                const hintBtn = document.getElementById('hintBtn');
+                if (hintBtn) hintBtn.disabled = false;
+                const playSoundBtn = document.getElementById('playSoundBtn');
+                if (playSoundBtn) playSoundBtn.disabled = false;
+            }
+        }
+
+        function showHint() {
+            document.getElementById('hint').innerHTML = `Hint: ${sentences[currentSentenceIndex].en}`;
+        }
+
+        function submitName() {
+            const nameInput = document.getElementById('playerNameInput');
+            playerName = nameInput.value.trim();
+            if (playerName) {
+                startGame();
+            } else {
+                alert("Please enter your name!");
+            }
+        }
+
+        function startGame() {
+            wrongAttempts = 0;
+            currentSentenceIndex = 0;
+            completedCount = 0;
+            incorrectAnswers = [];
+            const currentData = sentences[currentSentenceIndex];
+            document.getElementById('game-container').innerHTML = `
+                <h1>I Can Do It!</h1>
+                <p>Listen and type what you hear.<span class="instruction-vi">Hãy lắng nghe và gõ lại câu bạn nghe được.</span></p>
+                <p id="vietnamese-translation">${currentData.vi}</p>
+                <input type="text" id="userInput" placeholder="Type the sentence here...">
+                <div class="button-group">
+                    <button id="playSoundBtn" onclick="playSentence()">&#9658; Play Sound</button>
+                    <button id="checkBtn" onclick="checkAnswer()">Check</button>
+                    <button id="hintBtn" onclick="showHint()">Hint</button>
+                    <button onclick="resetGame()">Reset Game</button>
+                </div>
+                <p id="completion">Score: ${completedCount}/${TOTAL_SENTENCES}</p>
+                <p id="hint"></p>
+                <p id="result"></p>
+            `;
+            document.getElementById('userInput').addEventListener('keypress', handleKeyPress);
+            playSentence();
+            startAutoPlay();
+        }
+
+        function resetGame() {
+            stopAutoPlay();
+            speechSynthesis.cancel();
+            document.getElementById('game-container').innerHTML = `
+                <h1>Welcome to Spelling Master!</h1>
+                <p>Please enter your name to start.</p>
+                <input type="text" id="playerNameInput" placeholder="Your Name" value="${playerName}">
+                <button onclick="submitName()">Start Game</button>
+            `;
+        }
+        
+        function showReviewModal() {
+            const modal = document.getElementById('reviewModal');
+            const list = document.getElementById('mistakeList');
+            list.innerHTML = '';
+            incorrectAnswers.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<strong>Correct:</strong> ${item.en}<br><em>${item.vi}</em>`;
+                list.appendChild(listItem);
+            });
+            modal.style.display = 'flex';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); 
+                checkAnswer();
+            }
+        }
+    </script>
+</body>
+</html>
